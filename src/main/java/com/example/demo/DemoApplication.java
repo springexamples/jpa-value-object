@@ -26,11 +26,11 @@ public class DemoApplication {
     public CommandLineRunner init(UserRepository userRepository) {
         return args -> {
             Stream.of(
-                    new User("Ali", HijriDate.of("14380102")),
-                    new User("Wael", HijriDate.of("14380222")),
-                    new User("Mostafa", HijriDate.of("14390102")),
-                    new User("Mortada", HijriDate.of("14440116")),
-                    new User("Ibrahim", HijriDate.of("14360105"))
+                    new User("Ali", HijriDate.of("1438-01-02")),
+                    new User("Wael", HijriDate.of("1438-02-22")),
+                    new User("Mostafa", HijriDate.of("1439-01-02")),
+                    new User("Mortada", HijriDate.of("1444-01-16")),
+                    new User("Ibrahim", HijriDate.of("1436-01-05"))
             ).forEach(userRepository::save);
 
             userRepository.findAll().forEach(o -> System.out.println(o.getName() + ", " + o.getBirthDate().asLocalDate()));
@@ -46,15 +46,17 @@ interface UserRepository extends JpaRepository<User, Long> {
 class HijriDate {
 
     public static final String DB_DATE_FORMAT = "yyyyMMdd";
-    public static final String INPUT_DATE_FORMAT = "([1]\\d{3})(0[1-9]|1[0-2])(0[1-9]|[12]\\d|30)";
+    public static final String INPUT_REGEX = "([1]\\d{3})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|30)";   // yyyy-MM-dd
 
-    private int hijriDate;
+    private int hijriDate;      // stored in the database as Integer value like: 14440116
 
     static HijriDate of(String hijriDate) {
 
-        if (!hijriDate.matches(INPUT_DATE_FORMAT)) {
-            throw new IllegalArgumentException("invalid hijri date, " + hijriDate + " does not matches " + INPUT_DATE_FORMAT);
+        if (!hijriDate.matches(INPUT_REGEX)) {
+            throw new IllegalArgumentException("invalid hijri date, " + hijriDate + " does not matches " + INPUT_REGEX);
         }
+
+        hijriDate = hijriDate.replaceAll("-", "");
         HijriDate hd = new HijriDate();
         hd.hijriDate = Integer.parseInt(hijriDate);
         return hd;
